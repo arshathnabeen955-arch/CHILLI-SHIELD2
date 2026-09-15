@@ -1,0 +1,12 @@
+import { DemoAIService } from "@/services/DemoAIService";
+import { screeningDisclaimer } from "@/data/diseases";
+import { RealAIService } from "@/services/RealAIService";
+import { configuredModelMetadata } from "@/services/realModelConfig";
+import { DEMO_MODEL_METADATA, unavailableMetadata, type AIService, type ModelMetadata, type ScreeningResult } from "@/services/modelTypes";
+
+const demoAdapter: AIService = { metadata: DEMO_MODEL_METADATA, scan: async (_file, onProgress): Promise<ScreeningResult> => { const result = await DemoAIService.scan(onProgress); return { ...result, model: { name: "DemoAIService", version: "demo-2026", provider: "CHILLI-SHIELD demo" }, probabilities: result.conditions.map(item => ({ classId: item.name.toLowerCase().replaceAll(" ", "-"), label: item.name, probability: item.confidence / 100 })), confidence: result.conditions[0]?.confidence / 100 || 0, risk: { level: result.overallRiskLevel as "HIGH", score: 100 - result.overallHealthScore, rationale: result.explanation }, explanation: result.explanation, recommendedNextSteps: result.nextSteps, id: result.id, timestamp: result.timestamp, mode: "DEMO MODE", disclaimer: screeningDisclaimer }; } };
+export type RoutedScan = { service: AIService; metadata: ModelMetadata; result: ScreeningResult; usedFallback: boolean };
+export const getConfiguredService = (): AIService => configuredModelMetadata() ? RealAIService : demoAdapter;
+export const getCurrentModelMetadata = (): ModelMetadata => configuredModelMetadata() || DEMO_MODEL_METADATA;
+export const scanWithFallback = async (file: File, onProgress?: (step: string, index: number) => void): Promise<RoutedScan> => { const configured = configuredModelMetadata(); if (!configured) { const result = await demoAdapter.scan(file, onProgress); return { service: demoAdapter, metadata: DEMO_MODEL_METADATA, result, usedFallback: false }; } try { const result = await RealAIService.scan(file, onProgress); return { service: RealAIService, metadata: { ...RealAIService.metadata, status: "REAL MODEL CONNECTED" }, result, usedFallback: false }; } catch (error) { const reason = error instanceof Error ? error.message : "Unknown model integration error"; const unavailable = unavailableMetadata(reason, configured.endpoint); return { service: { ...demoAdapter, metadata: unavailable }, metadata: unavailable, result: await demoAdapter.scan(file, onProgress), usedFallback: true }; } };
+export const demoService = demoAdapter;
