@@ -79,3 +79,12 @@ AI-Assisted Early Detection of Viral Disease in Chilli Plants
 
 **Tagline:**  
 *See the disease before it sees your harvest.*
+
+
+## 🎥 Project Video
+
+[![CHILLI-SHIELD Project Video](https://img.youtube.com/vi/LvkJV8uHZF4/0.jpg)](https://youtu.be/LvkJV8uHZF4)
+
+**AI-Assisted Early Detection of Viral Disease in Chilli Plants**
+
+[Watch the Project Video on YouTube](https://youtu.be/LvkJV8uHZF4)
