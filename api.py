@@ -3,6 +3,7 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 import io
 
 
@@ -79,7 +80,13 @@ app = FastAPI(
     version="1.0"
 )
 
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # ============================================================
 # ROOT
 # ============================================================
